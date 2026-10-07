@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial - Manejo de excepciones en Python</title>
+<style>
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --python-blue: #306998;
+  --python-blue-light: #4B8BBE;
+  --python-blue-dark: #265577;
+  --python-yellow: #FFD43B;
+  --python-yellow-dark: #E5BE01;
+  --bg-dark: #1a1a2e;
+  --bg-card: #16213e;
+  --text-light: #e0e0e0;
+  --text-muted: #a0a0b8;
+  --error: #f44336;
+  --border-radius: 12px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.3);
+  --color-rojo: red;
+  --color-green: green;
+  --border: rgba(48,105,152,0.3);
+  --text-dim: #a0a0b8;
+}
+
+p {
+  text-align: justify;
+}
+
+.text-center {
+  text-align: center;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-light);
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--python-blue);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--python-blue-light);
+}
+
+header {
+  background: linear-gradient(135deg, var(--python-blue-dark) 0%, var(--python-blue) 50%, var(--python-yellow-dark) 100%);
+  padding: 40px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,212,59,0.1) 0%, transparent 60%);
+  animation: pulse 8s ease-in-out infinite;
+}
+
+@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 1; } }
+
+.logo-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.python-logo-svg {
+  width: 100px;
+  height: 100px;
+  filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+}
+
+header h1 {
+  font-size: 2.5em;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  position: relative;
+  z-index: 1;
+}
+
+header h1 span.blue {
+  color: var(--python-yellow);
+}
+
+header h1 span.yellow {
+  color: var(--python-blue-light);
+}
+
+header p {
+  font-size: 1.2em;
+  color: rgba(255,255,255,0.85);
+  margin-top: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+nav {
+  background: var(--bg-card);
+  padding: 15px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  border-bottom: 2px solid var(--python-blue);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-btn {
+  background: transparent;
+  color: var(--text-light);
+  border: 1px solid rgba(48,105,152,0.4);
+  padding: 7px 13px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 0.8em;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.nav-btn:hover,
+.nav-btn.active {
+  background: var(--python-blue);
+  border-color: var(--python-yellow);
+  color: var(--python-yellow);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(48,105,152,0.4);
+}
+
+.progress-bar {
+  width: 100%;
+  max-width: 1200px;
+  margin: 10px auto 0;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--python-blue), var(--python-yellow));
+  width: 0%;
+  transition: width 0.5s ease;
+  border-radius: 2px;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 0.75em;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 30px 20px 60px;
+}
+
+.section {
+  display: none;
+  animation: fadeIn 0.5s ease;
+}
+
+.section.active {
+  display: block;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--border-radius);
+  padding: 25px;
+  margin-bottom: 25px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(48,105,152,0.2);
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.card:hover {
+  border-color: rgba(255,212,59,0.3);
+}
+
+.card h3 {
+  color: var(--python-yellow);
+  font-size: 1.3em;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card h3.sub {
+  color: var(--python-blue);
+  font-size: 1.3em;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card p,
+.card li {
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.card ul {
+  padding-left: 20px;
+}
+
+.card ul li {
+  margin-bottom: 5px;
+}
+
+.comparison-table {
+  width: 100%;
+  min-width: 0px;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 20px auto;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(48,105,152,0.3);
+}
+
+.comparison-table th {
+  background: linear-gradient(135deg, var(--python-blue-dark), var(--python-blue));
+  color: var(--python-yellow);
+  padding: 14px 18px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.comparison-table td {
+  background: var(--bg-card);
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(48,105,152,0.15);
+  font-size: 0.9em;
+}
+
+.comparison-table tr:last-child td {
+  border-bottom: none;
+}
+
+.comparison-table tr:hover td {
+  background: rgba(48,105,152,0.1);
+}
+
+.comparison-table code {
+  background: rgba(255,212,59,0.1);
+  color: var(--python-yellow);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'Consolas', monospace;
+  font-size: 0.9em;
+}
+
+.tip-box {
+  background: rgba(255,212,59,0.08);
+  border-left: 4px solid var(--python-yellow);
+  border-radius: 0 10px 10px 0;
+  padding: 18px 20px;
+  margin: 20px 0;
+}
+
+.tip-box .tip-title {
+  color: var(--python-yellow);
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tip-box p {
+  color: var(--text-muted);
+  font-size: 0.95em;
+}
+
+.warning-box {
+  background: rgba(244,67,54,0.08);
+  border-left: 4px solid var(--error);
+  border-radius: 0 10px 10px 0;
+  padding: 18px 20px;
+  margin: 20px 0;
+}
+
+.warning-box .warning-title {
+  color: var(--color-rojo);
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.warning-box p {
+  color: #fef08a;
+  font-size: 0.95em;
+}
+
+.note-box {
+  background: rgba(255,212,59,0.08);
+  border-left: 4px solid var(--color-green);
+  border-radius: 0 10px 10px 0;
+  padding: 18px 20px;
+  margin: 20px 0;
+}
+
+.note-box .note-title {
+  color: var(--color-green);
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.note-box p {
+  color: var(--text-muted);
+  font-size: 0.95em;
+}
+
+.nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(48,105,152,0.2);
+}
+
+.nav-arrow-btn {
+  background: linear-gradient(135deg, var(--python-blue), var(--python-blue-light));
+  color: #fff;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.95em;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-arrow-btn:hover {
+  background: linear-gradient(135deg, var(--python-yellow-dark), var(--python-yellow));
+  color: var(--bg-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255,212,59,0.3);
+}
+
+.nav-arrow-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+footer {
+  text-align: center;
+  padding: 30px 20px;
+  color: var(--text-muted);
+  font-size: 0.85em;
+  border-top: 1px solid rgba(48,105,152,0.2);
+  margin-top: 40px;
+}
+
+@media (max-width: 768px) {
+  header h1 { font-size: 1.8em; }
+  .nav-container { gap: 5px; }
+  .nav-btn { padding: 6px 12px; font-size: 0.75em; }
+  .python-logo-svg { width: 80px; height: 80px; }
+  .footer-logo-space img { height: 45px; }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.icon-blue {
+  background: rgba(48,105,152,0.25);
+  border: 1px solid rgba(48,105,152,0.4);
+}
+
+.icon-yellow {
+  background: rgba(255,212,59,0.15);
+  border: 1px solid rgba(255,212,59,0.3);
+}
+
+.section-header-text h2 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.section-header-text p {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.comparison-table.table-compact th,
+.comparison-table.table-compact td {
+  font-size: 0.9em;
+  padding: 12px 18px;
+  white-space: nowrap;
+}
+
+.code-wrap pre[class*="language-"] {
+  flex: 1;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  padding: 15px 20px !important;
+  background: transparent !important;
+  font-family: 'Consolas','Monaco','Courier New',monospace !important;
+  font-size: 0.9em !important;
+  line-height: 1.8 !important;
+  overflow-x: visible;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype {
+  color: #546e7a !important;
+  font-style: italic;
+}
+
+.token.keyword {
+  color: #c792ea !important;
+  font-weight: bold;
+}
+
+.token.builtin {
+  color: #89ddff !important;
+}
+
+.token.string,
+.token.char {
+  color: #c3e88d !important;
+}
+
+.token.number {
+  color: #f78c6c !important;
+}
+
+.token.function {
+  color: #82aaff !important;
+}
+
+.token.class-name {
+  color: #89ddff !important;
+  font-weight: 600;
+}
+
+.token.decorator,
+.token.at-rule {
+  color: #4ade80 !important;
+}
+
+.token.boolean {
+  color: #ff5370 !important;
+  font-weight: bold;
+}
+
+.token.operator {
+  color: #89ddff !important;
+}
+
+.token.punctuation {
+  color: #89ddff !important;
+}
+
+.output-body pre {
+  color: #4ade80;
+}
+
+.snippet {
+  background: var(--bg-card);
+  border: 1px solid rgba(48,105,152,0.25);
+  border-radius: 12px;
+  margin-bottom: 32px;
+  overflow: hidden;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.snippet:hover {
+  border-color: rgba(255,212,59,.35);
+  box-shadow: 0 0 32px rgba(255,212,59,.06);
+}
+
+.snippet-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(48,105,152,0.25);
+  gap: 12px;
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: block;
+}
+
+.dots span:nth-child(1) {
+  background: #ff5f57;
+}
+
+.dots span:nth-child(2) {
+  background: #febc2e;
+}
+
+.dots span:nth-child(3) {
+  background: #28c840;
+}
+
+.snippet-title {
+  font-family: 'Consolas','Monaco','Courier New',monospace;
+  font-size: .8rem;
+  color: var(--text-muted);
+  flex: 1;
+  text-align: center;
+}
+
+.snippet-tag {
+  font-family: 'Consolas','Monaco','Courier New',monospace;
+  font-size: .72rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.tag-fn {
+  background: rgba(92,216,247,.15);
+  color: #5cd8f7;
+}
+
+.tag-output {
+  background: rgba(74,222,128,.15);
+  color: #4ade80;
+}
+
+.output-bar {
+  border-top: 1px solid rgba(48,105,152,0.25);
+  justify-content: flex-end;
+}
+
+.snippet pre[class*="language-"] {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  padding: 22px 24px !important;
+  background: transparent !important;
+  font-family: 'Consolas','Monaco','Courier New',monospace !important;
+  font-size: .85rem !important;
+  line-height: 1.75 !important;
+  overflow-x: auto;
+}
+
+.output-body {
+  background: #0a0c10;
+  padding: 16px 24px;
+  font-family: 'Consolas','Monaco','Courier New',monospace;
+  font-size: .85rem;
+  line-height: 1.75;
+}
+
+.code-wrap {
+  display: flex;
+  overflow-x: auto;
+}
+
+.line-numbers-col {
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.03);
+  border-right: 1px solid rgba(48,105,152,0.25);
+  padding: 22px 14px 22px 16px;
+  font-family: 'Consolas','Monaco','Courier New',monospace;
+  font-size: .85rem;
+  line-height: 1.75;
+  color: #3d4a6a;
+  text-align: right;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
+}
+
+.line-numbers-col span {
+  display: block;
+}
+
+.footer-m365 {
+  background: linear-gradient(
+        180deg,
+        #0d1230 0%, 
+		#060a1a 100%
+    );
+  padding: 10px 5%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+}
+
+.footer-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 10px 20px;
+}
+
+.footer-m365-label {
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #7fb8d9;
+  opacity: 0.85;
+  margin-bottom: 15px;
+}
+
+.footer-m365-title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #eaf6ff;
+  text-shadow: 0 0 12px rgba(58, 214, 245, 0.15);
+  margin-bottom: 0px;
+}
+
+.footer-top-bar {
+  height: 3px;
+  background: linear-gradient(90deg,#0a2e6b 0%,#1a55d6 45%,#11c9f5 100%);
+}
+
+.footer-bottom-bar {
+  height: 3px;
+  background: linear-gradient(90deg,#11c9f5 0%,#1a55d6 55%,#0a2e6b 100%);
+}
+
+.footer-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0px 0px;
+  padding-bottom: 10px;
+}
+
+.footer-logo-space {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-logo-space img {
+  filter: drop-shadow(0 0 6px rgba(58, 214, 245, 0.25));
+  height: 34px;
+  width: auto;
+}
+
+.footer-logo-space .name {
+  font-size: 1rem;
+  font-weight: 700;
+  background: linear-gradient(to right, #0a3d91, #1a6dd4, #3ad6f5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.footer-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.footer-text .label {
+  font-size: 1rem;
+  font-weight: 700;
+  padding-left: 25px;
+  color: #8fb8d9;
+}
+
+.footer-text .name {
+  font-size: 1rem;
+  font-weight: 700;
+  background: repeating-linear-gradient(to right, #0a3d91 0%, #1a6dd4 55%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+</style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet"/>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <svg class="python-logo-svg" viewBox="0 0 256 255" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="pyBlueGrad" x1="12.961%" y1="0.475%" x2="99.844%" y2="99.675%"><stop offset="0%" stop-color="#387EB8"/><stop offset="100%" stop-color="#366994"/></linearGradient>
+                    <linearGradient id="pyYellowGrad" x1="12.961%" y1="0.475%" x2="99.844%" y2="99.675%"><stop offset="0%" stop-color="#FFD43B"/><stop offset="100%" stop-color="#FFE873"/></linearGradient>
+                </defs>
+                <path d="M126.916 0C62.366 0 66.173 28.423 66.173 28.423L66.274 57.564H128.183V68.615H31.131C31.131 68.615 0.085 65.185 0.085 125.675C0.085 186.164 26.773 185.833 26.773 185.833H53.592V158.615C53.592 158.615 53.238 131.22 81.577 131.22H184.388C184.388 131.22 209.822 131.832 209.822 105.038V35.156C209.822 35.156 213.486 0 126.916 0ZM93.314 20.983C99.709 20.983 104.897 26.17 104.897 32.565C104.897 38.96 99.709 44.147 93.314 44.147C86.919 44.147 81.733 38.96 81.733 32.565C81.733 26.17 86.919 20.983 93.314 20.983Z" fill="url(#pyBlueGrad)"/>
+                <path d="M128.76 254.684C193.309 254.684 189.503 226.261 189.503 226.261L189.402 197.12H127.493V186.069H224.545C224.545 186.069 255.591 189.499 255.591 129.01C255.591 68.52 228.903 68.851 228.903 68.851H202.084V96.07C202.084 96.07 202.438 123.464 174.099 123.464H71.289C71.289 123.464 45.854 122.852 45.854 149.646V219.528C45.854 219.528 42.19 254.684 128.76 254.684ZM162.361 233.701C155.966 233.701 150.779 228.514 150.779 222.119C150.779 215.724 155.966 210.537 162.361 210.537C168.756 210.537 173.942 215.724 173.942 222.119C173.942 228.514 168.756 233.701 162.361 233.701Z" fill="url(#pyYellowGrad)"/>
+            </svg>
+        </div>
+        <h1>Fundamentos de Programación en <span class="blue">Python</span></h1>
+        <p class="text-center">
+			Tutorial Completo · Aprende el uso del <span class="yellow">manejo de excepciones</span>
+		</p>
+    </header>
+
+    <nav>
+        <div class="nav-container">
+            <button class="nav-btn active" onclick="goToSection(0)">🏠 Inicio</button>
+            <button class="nav-btn" onclick="goToSection(1)">1 🪤 try / except</button>
+            <button class="nav-btn" onclick="goToSection(2)">2 ✅ else</button>
+            <button class="nav-btn" onclick="goToSection(3)">3 ♻️ finally</button>
+            <button class="nav-btn" onclick="goToSection(4)">4 🚨 raise</button>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-text" id="progressText">Sección 1 de 5</div>
+    </nav>
+
+    <main>
+		<!-- ===== SECCIÓN 0: INICIO ===== -->
+		<div class="section active" id="section-0">           			
+			<div class="section-header">
+				<div class="section-icon icon-blue">🏠</div>
+				<div class="section-header-text">
+					<h2>Manejo de Excepciones</h2>
+					<p>Qué son y por qué manejarlas</p>
+				</div>
+			</div>
+			
+			<div class="card">		
+				<p>
+					Una <strong>excepción</strong> es un evento que ocurre durante la ejecución de un programa y que interrumpe el flujo normal de instrucciones. Cuando Python encuentra un error en tiempo de ejecución, crea un objeto de excepción. Si ese objeto no es "atrapado" y manejado, el programa termina mostrando un <em>traceback</em> (un <strong>traceback</strong> es el reporte que Python genera cuando ocurre una excepción. Muestra la cadena de llamadas realizadas, el archivo, la línea donde ocurrió el problema y el tipo de excepción producida.).
+					<br><br>
+					Es importante distinguir entre dos tipos de errores:
+				</p>
+				<ul style="padding-left:40px;">
+					<li style="text-align: justify;">
+						<strong>Errores de sintaxis (<code>SyntaxError</code>):</strong> ocurren antes de ejecutar el código, cuando Python no puede interpretar lo que escribiste. Aunque <code>SyntaxError</code> es técnicamente una clase de excepción, no puedes capturarlo con <code>try / except</code> en el mismo archivo donde ocurre, porque el programa ni siquiera llega a ejecutarse.
+					</li>
+					<li>
+						<strong>Excepciones:</strong> ocurren <em>durante</em> la ejecución, cuando el código es sintácticamente válido pero algo sale mal (dividir entre cero, acceder a un índice inexistente, abrir un archivo que no existe, etc.).
+					</li>
+				</ul>
+			</div>
+			
+			
+			<div class="card">		
+				<p>
+					Durante la ejecución de un programa pueden ocurrir situaciones inesperadas que impiden que las instrucciones continúen normalmente. Estas situaciones se conocen como <strong>excepciones</strong>. Algunas son provocadas por errores de programación, mientras que otras ocurren debido a datos incorrectos introducidos por el usuario, archivos inexistentes, divisiones entre cero, problemas de entrada/salida, entre otros.
+				</p>
+
+				<p>
+					El <strong>manejo de excepciones</strong> es el mecanismo que proporciona Python para detectar y controlar estos eventos de forma ordenada, evitando que el programa termine abruptamente y permitiendo ofrecer mensajes claros al usuario o tomar acciones correctivas.
+				</p>
+			
+				<p>
+					Sin un manejo adecuado de excepciones, cualquier error durante la ejecución puede detener completamente la aplicación. En cambio, al utilizar las estructuras de control de excepciones, es posible capturar los errores, registrar información relevante, solicitar nuevos datos al usuario o continuar ejecutando otras partes del programa.
+				</p>
+			</div>
+			
+			
+			<div class="card">		
+				<p>
+					Python implementa este mecanismo mediante las palabras reservadas:
+				</p>
+				<ul style="padding-left:40px;">
+					<li style="text-align: justify;">
+						<code>try</code>: contiene el código que puede generar una excepción.
+					</li>
+					<li>
+						<code>except</code>: captura y procesa una excepción específica o general.
+					</li>
+					<li>
+						<code>else</code>: se ejecuta cuando no ocurre ninguna excepción.
+					</li>
+					<li>
+						<code>finally</code>: se ejecuta siempre, ocurra o no una excepción.
+					</li>
+					<li>
+						<code>raise</code>: permite generar excepciones de manera explícita.
+					</li>
+				</ul>
+			</div>
+			
+			
+			<div class="card">		
+				<h3>¿Por qué es importante manejar excepciones?</h3>
+				<p>El manejo de excepciones permite:</p>
+				<ul style="padding-left:40px;">
+					<li style="text-align: justify;">
+						Evitar la terminación inesperada de los programas.
+					</li>
+					<li>
+						Mejorar la robustez y confiabilidad del software.
+					</li>
+					<li>
+						Proporcionar mensajes de error comprensibles para el usuario.
+					</li>
+					<li>
+						Separar la lógica principal del tratamiento de errores.
+					</li>
+					<li>
+						Facilitar la depuración y el mantenimiento del código.
+					</li>
+					<li>
+						Recuperarse de situaciones anómalas cuando sea posible.
+					</li>
+				</ul>
+			</div>
+			
+			
+			<div class="card">
+				<h3>Ejemplos de situaciones que pueden generar excepciones</h3>
+				<table class="comparison-table table-compact">
+					<thead>
+						<tr>
+							<th>Situación</th>
+							<th>Excepción</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Dividir entre cero</td>
+							<td><code>ZeroDivisionError</code></td>
+						</tr>
+						<tr>
+							<td>Convertir texto a entero inválido</td>
+							<td><code>ValueError</code></td>
+						</tr>
+						<tr>
+							<td>Acceder a un índice inexistente de una lista</td>
+							<td><code>IndexError</code></td>
+						</tr>
+						<tr>
+							<td>Abrir un archivo que no existe</td>
+							<td><code>FileNotFoundError</code></td>
+						</tr>
+						<tr>
+							<td>Utilizar un tipo de dato incorrecto en una operación</td>
+							<td><code>TypeError</code></td>
+						</tr>
+						<tr>
+							<td>Acceder a un atributo inexistente de un objeto</td>
+							<td><code>AttributeError</code></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			
+			
+			<div class="card">
+				<h3>⛳ Objetivo del manejo de excepciones</h3>
+				<p>
+					El objetivo principal no es evitar que ocurran errores, sino <strong>detectarlos, controlarlos y responder adecuadamente a ellos</strong>, permitiendo que el programa sea más seguro, estable y fácil de utilizar.
+
+					En aplicaciones reales, el manejo de excepciones es una práctica fundamental para desarrollar software profesional, ya que ayuda a anticipar situaciones inesperadas y garantiza una mejor experiencia para los usuarios.
+				</p>
+			</div>
+
+
+			<div class="nav-buttons"><button class="nav-arrow-btn" disabled>← Anterior</button><button class="nav-arrow-btn" onclick="goToSection(1)">Siguiente: try / except →</button></div>
+		</div>
+
+		<!-- ===== SECCIÓN 1: try / except (+ as) ===== -->
+		<div class="section" id="section-1">           			
+			<div class="section-header">
+				<div class="section-icon icon-blue">🪤</div>
+				<div class="section-header-text">
+					<h2>try / except</h2>
+					<p>Capturando excepciones y accediendo a ellas con as</p>
+				</div>
+			</div>
+			
+		
+			<div class="card">		
+				<p>
+					El bloque <code>try / except</code> es el mecanismo fundamental de Python para <strong>anticipar errores, capturarlos y decidir qué hacer con ellos</strong>, sin que el programa se detenga abruptamente.
+				</p>
+				<p>
+					La idea es simple: le dices a Python <em>"intenta ejecutar esto, y si algo sale mal, haz aquello"</em>. En lugar de un mensaje de error (traceback) y un programa muerto, obtienes control total sobre la situación.
+				</p>
+			</div>
+			
+			
+			<div class="card">		
+				<h3>Sintaxis: </h3>
+<pre>
+<code class="language-python">try:
+    # Código que puede lanzar una excepción
+    ...
+except TipoDeExcepcion:
+    # Qué hacer si ocurre ese error
+    ...</code>
+</pre>
+				<p>
+					El flujo es el siguiente:
+				</p>
+				
+				<ol style="padding-left:40px;">
+					<li style="text-align: justify;">
+						Python ejecuta el bloque try línea por línea.
+					</li>
+					<li>
+						Si no ocurre ningún error, el bloque except se ignora por completo.
+					</li>
+					<li>
+						Si ocurre una excepción, Python detiene el try en ese punto exacto y salta al except correspondiente.
+					</li>
+					<li>
+						Si la excepción no coincide con ningún except declarado, se propaga hacia arriba y termina siendo un traceback.
+					</li>
+				</ol>
+			</div>
+			
+			
+			<div class="card">
+				<h3 class="sub">💻 Ejemplo</h3>
+				<div class="snippet">
+					<div class="snippet-bar">
+					  <div class="dots"><span></span><span></span><span></span></div>
+					  <span class="snippet-title">Python</span>
+					  <span class="snippet-tag tag-fn">ejemplo</span>
+					</div>
+					<div class="code-wrap">
+						<div class="line-numbers-col"></div>
+<pre>
+<code class="language-python">try:
+    # Código que puede lanzar una excepción
+    resultado = 10 / 0
+except ZeroDivisionError:
+    # Se ejecuta si ocurre esa excepción específica
+    print("Error: no se puede dividir entre cero.")</code>
+</pre>
+					</div>
+					<div class="snippet-bar output-bar">
+					  <span class="snippet-tag tag-output">salida</span>
+					</div>
+
+					<div class="output-body">
+<pre>
+Error: no se puede dividir entre cero.
+</pre>
+					</div>
+				</div>
+				<p>
+					El bloque <code>try</code> "envuelve" el código riesgoso. Si ocurre una excepción del tipo indicado en <code>except</code>, Python salta inmediatamente a ese bloque y continúa desde ahí.
+				</p>
+			</div>
+		
+			
+			<div class="card">		
+				<h3>Capturar múltiples excepciones</h3>
+				<p>
+					En la práctica, un mismo bloque de código puede fallar de más de una manera. Imagina que le pides un número al usuario y lo usas para dividir: puede que escriba letras en lugar de un número (<code>ValueError</code>), o que escriba cero (<code>ZeroDivisionError</code>). Son errores distintos, con causas distintas, y lo ideal es manejarlos de forma independiente con mensajes y acciones apropiadas para cada uno.
+					<br><br>
+					Python te da dos formas de lograrlo.
+				</p>
+			</div>
+			
+			
+			<div class="card">		
+				<h3>Opción 1: Varios bloques <code>except</code> (recomendada)</h3>
+				<p>
+					Cada tipo de error tiene su propio bloque, lo que te permite reaccionar de forma específica ante cada situación.
+				</p>
+				<h3 class="sub">Sintaxis</h3>
+<pre>
+<code class="language-python">try:
+    # código riesgoso
+    ...
+except TipoExcepcion1:
+    # manejo específico para el error 1
+    ...
+except TipoExcepcion2:
+    # manejo específico para el error 2
+    ...
+except TipoExcepcionN:
+    # manejo específico para el error N
+    ...</code>
+</pre>
+			</div>
+			
+			
+			<div class="card">
+				<h3 class="sub">💻 Ejemplo</h3>
+				<div class="snippet">
+					<div class="snippet-bar">
+					  <div class="dots"><span></span><span></span><span></span></div>
+					  <span class="snippet-title">Python</span>
+					  <span class="snippet-tag tag-fn">ejemplo</span>
+					</div>
+					<div class="code-wrap">
+						<div class="line-numbers-col"></div>
+<pre>
+<code class="language-python">try:
+    numero = int(input("Ingresa un número: "))
+    resultado = 100 / numero
+except ValueError:
+    print("Eso no es un número válido.")
+except ZeroDivisionError:
+    print("No puedes dividir entre cero.")</code>
+</pre>
+					</div>
+					<div class="snippet-bar output-bar">
+					  <span class="snippet-tag tag-output">salida</span>
+					</div>
+
+					<div class="output-body">
+<pre>
+# si ingresas cero
+No puedes dividir entre cero.
+
+# si ingresas una cadena, por ejemplo: abc
+Eso no es un número válido.
+
+# si ingresas un número válido, por ejemplo: 5
+(no imprime nada)
+</pre>
+					</div>
+				</div>
+				<p>
+					Cada bloque maneja un tipo diferente de error, lo que te permite dar mensajes específicos y tomar acciones distintas para cada caso.
+				</p>
+			</div>
+			
+			
+			<div class="card">		
+				<h3>Opción 2: Varios tipos en un solo <code>except</code></h3>
+				<p>
+					Cuando el manejo es idéntico para varios errores, puedes agruparlos en una tupla:
+				</p>
+				<h3 class="sub">Sintaxis</h3>
+<pre>
+<code class="language-python">try:
+    # código riesgoso
+    ...
+except (TipoExcepcion1, TipoExcepcion2, ..., TipoExcepcionN) as e:
+    # manejo idéntico para todos los errores
+    ...</code>
+</pre>
+			</div>
+			
+			
+			<div class="card">
+				<h3 class="sub">💻 Ejemplo</h3>
+				<div class="snippet">
+					<div class="snippet-bar">
+					  <div class="dots"><span></span><span></span><span></span></div>
+					  <span class="snippet-title">Python</span>
+					  <span class="snippet-tag tag-fn">ejemplo</span>
+					</div>
+					<div class="code-wrap">
+						<div class="line-numbers-col"></div>
+<pre>
+<code class="language-python">try:
+    numero = int(input("Ingresa un número: "))
+    resultado = 100 / numero
+except (ValueError, ZeroDivisionError) as e:
+    print(f"Ocurrió un error: {e}")</code>
+</pre>
+					</div>
+					<div class="snippet-bar output-bar">
+					  <span class="snippet-tag tag-output">salida</span>
+					</div>
+
+					<div class="output-body">
+<pre>
+# si ingresas cero
+Ocurrió un error: division by zero
+
+# si ingresas una cadena, por ejemplo: a
+Ocurrió un error: invalid literal for int() with base 10: 'a'
+</pre>
+					</div>
+				</div>
+				<p>
+					Útil cuando el manejo es idéntico para ambos errores.
+				</p>
+			</div>
+			
+			
+			<div class="card">
+				<h3>Acceder al objeto de excepción con <code>as</code></h3>
+				<p>
+					Cuando ocurre una excepción, Python no solo interrumpe el flujo, sino que crea un <strong>objeto</strong> que contiene información detallada sobre el error. Por defecto, al capturar una excepción con <code>except</code>, ese objeto existe pero lo estás ignorando. Con la palabra clave <code>as</code> (que ya apareció en la opción 2) puedes darle un nombre y acceder a él para obtener detalles útiles como el mensaje, el tipo o los argumentos del error.
+				</p>
+				<p>
+					Esto es especialmente valioso cuando quieres mostrar mensajes de error descriptivos, registrar el error en un log, o tomar decisiones distintas según el contenido específico del error, no solo su tipo.
+				</p>
+				<h3 class="sub">Sintaxis</h3>
+<pre>
+<code class="language-python">try:
+    # código riesgoso
+    ...
+except TipoDeExcepcion as e:
+    print(e)            # mensaje legible del error
+    print(type(e))      # clase exacta de la excepción
+    print(e.args)       # tupla con los argumentos del error</code>
+</pre>
+				<p>
+					La variable <code>e</code> es simplemente el nombre convencional — puedes llamarla como quieras, aunque <code>e</code>, <code>ex</code> o <code>err</code> son los más usados por la comunidad.
+				</p>
+			</div>
+
+			<div class="card">
+				<h3 class="sub">💻 Ejemplo</h3>
+				<div class="snippet">
+					<div class="snippet-bar">
+					  <div class="dots"><span></span><span></span><span></span></div>
+					  <span class="snippet-title">Python</span>
+					  <span class="snippet-tag tag-fn">ejemplo</span>
+					</div>
+					<div class="code-wrap">
+						<div class="line-numbers-col"></div>
+<pre>
+<code class="language-python">try:
+    lista = [1, 2, 3]
+    print(lista[10])
+except IndexError as e:
+    print(f"Tipo de error: {type(e).__name__}")
+    print(f"Mensaje: {e}")
+    print(f"Argumentos: {e.args}")</code>
+</pre>
+					</div>
+					<div class="snippet-bar output-bar">
+					  <span class="snippet-tag tag-output">salida</span>
+					</div>
+
+					<div class="output-body">
+<pre>
+Tipo de error: IndexError
+Mensaje: list index out of range
+Argumentos: ('list index out of range',)
+</pre>
+					</div>
+				</div>
+			</div>
+
+			<div class="note-box">
+				<div class="note-title">📝 Nota:</div>
+				<p>
+					El alcance de <code>e</code> está limitado al bloque <code>except</code>: al salir de él, Python elimina la variable y usarla provocaría un <code>NameError</code>.
+				</p>
+			</div>
+
+			<div class="warning-box">
+				<div class="warning-title">⚠️ Precaución:</div>
+				<p>
+					Evita usar <code>except:</code> (sin tipo) o <code>except Exception:</code> como única cláusula sin relanzar o registrar el error. Esto "traga" silenciosamente cualquier fallo, incluyendo bugs reales en tu código, haciendo la depuración extremadamente difícil. Además, <code>except:</code> sin tipo captura también <code>KeyboardInterrupt</code> y <code>SystemExit</code> (por ejemplo, Ctrl+C dejaría de detener tu programa), mientras que <code>except Exception:</code> no los captura.
+				</p>
+			</div>
+			
+			
+			<div class="warning-box">
+				<div class="warning-title">⚠️ Precaución:</div>
+				<p>
+					Ten cuidado con el orden de los bloques <code>except</code> cuando capturas excepciones de una jerarquía. Siempre coloca las más específicas antes que las más generales. Si pones <code>except Exception</code> antes que <code>except ValueError</code>, el <code>ValueError</code> nunca será alcanzado porque <code>Exception</code> lo captura primero. Lo mismo ocurre con <code>FileNotFoundError</code>, que es subclase de <code>OSError</code>: si capturas <code>OSError</code> antes, el <code>except FileNotFoundError</code> nunca se ejecutará.
+				</p>
+			</div>
+
+			<div class="nav-buttons"><button class="nav-arrow-btn" onclick="goToSection(0)">← Anterior</button><button class="nav-arrow-btn" onclick="goToSection(2)">Siguiente: else →</button></div>
+		</div>
+
+		<!-- ===== SECCIÓN 2: else ===== -->
+		<div class="section" id="section-2">
+			<div class="section-header">
+				<div class="section-icon icon-blue">✅</div>
+				<div class="section-header-text">
+					<h2>else</h2>
+					<p>Código que depende del éxito del try</p>
+				</div>
+			</div>
+			
+			<div class="card">		
+				<p>
+					Se ejecuta <strong>solo si no ocurrió ninguna excepción</strong> en el bloque <code>try</code>. Es la forma correcta de separar "el código que puede fallar" de "el código que depende de que no haya fallado":
+				</p>
+				<h3 class="sub">Sintaxis</h3>
+<pre>
+<code class="language-python">try:
+    # código riesgoso
+    ...
+except TipoDeExcepcion:
+    # se ejecuta si ocurrió el error
+    ...
+else:
+    # se ejecuta SOLO si no ocurrió ninguna excepción
+    ...</code>
+</pre>
+			</div>
+			
+			
+			<div class="card">
+				<h3 class="sub">💻 Ejemplo</h3>
+				<div class="snippet">
+					<div class="snippet-bar">
+					  <div class="dots"><span></span><span></span><span></span></div>
+					  <span class="snippet-title">Python</span>
+					  <span class="snippet-tag tag-fn">ejemplo</span>
+					</div>
+					<div class="code-wrap">
+						<div class="line-numbers-col"></div>
+<pre>
+<code class="language-python">try:
+    archivo = open("datos.txt", "r")
+except FileNotFoundError:
+    print("El archivo no existe.")
+else:
+    contenido = archivo.read()
+    print(f"Archivo leído: {len(contenido)} caracteres.")
+    archivo.close()</code>
+</pre>
+					</div>
+					<div class="snippet-bar output-bar">
+					  <span class="snippet-tag tag-output">salida</span>
+					</div>
+
+					<div class="output-body">
+<pre>
+# si datos.txt no existe
+El archivo no existe.
+
+# si datos.txt existe y tiene 10 caracteres
+Archivo leído: 10 caracteres.
+</pre>
+					</div>
+				</div>
+				<p>
+					Observa que la lectura del archivo está en <code>else</code> y no dentro de <code>try</code>: el <code>try</code> solo contiene la línea que realmente puede lanzar <code>FileNotFoundError</code>.
+				</p>
+			</div>
+			
+			
+			<div class="tip-box">
+				<div class="tip-title">💡 Tip:</div>
+				<p>
+					Usa <code>else</code> para mantener el bloque <code>try</code> lo más pequeño posible. Solo debe contener el código que realmente puede lanzar la excepción que quieres capturar. El código que depende del éxito va en <code>else</code>.
+				</p>
+			</div>
+
+			<div class="warning-box">
+				<div class="warning-title">⚠️ Precaución:</div>
+				<p>
+					Una excepción lanzada dentro de <code>else</code> no es capturada por los <code>except</code> del mismo <code>try</code>: sube hacia el código exterior. Lo mismo ocurre con las excepciones lanzadas dentro de <code>finally</code>.
+				</p>
+			</div>
+
+			<div class="nav-buttons"><button class="nav-arrow-btn" onclick="goToSection(1)">← Anterior</button><button class="nav-arrow-btn" onclick="goToSection(3)">Siguiente: finally →</button></div>
+		</div>
+
+		<!-- ===== SECCIÓN 3: finally (+ with) ===== -->
+		<div class="section" id="section-3">
+			<div class="section-header">
+				<div class="section-icon icon-yellow">♻️</div>
+				<div class="section-header-text">
+					<h2>finally</h2>
+					<p>Limpieza que se ejecuta siempre</p>
+				</div>
+			</div>
+			
+			<div class="card">		
+				<p>
+					Se ejecuta <strong>siempre</strong>, haya o no habido excepción, e incluso si hay un <code>return</code> dentro del <code>try</code>. Es ideal para liberar recursos:
+				</p>
+<pre>
+<code class="language-python">try:
+    # código riesgoso
+    ...
+except TipoDeExcepcion:
+    # se ejecuta si ocurrió el error
+    ...
+finally:
+    # se ejecuta SIEMPRE, haya o no excepción
+    ...</code>
+</pre>			
+			</div>
+			
+			
+			<div class="card">
+				<h3 class="sub">💻 Ejemplo</h3>
+				<div class="snippet">
+					<div class="snippet-bar">
+					  <div class="dots"><span></span><span></span><span></span></div>
+					  <span class="snippet-title">Python</span>
+					  <span class="snippet-tag tag-fn">ejemplo</span>
+					</div>
+					<div class="code-wrap">
+						<div class="line-numbers-col"></div>
+<pre>
+<code class="language-python">archivo = None
+try:
+    archivo = open("datos.txt", "r")
+    datos = archivo.read()
+    int(datos)  # lanza ValueError si el contenido no es un número
+except ValueError:
+    print("El archivo no contiene un número válido.")
+except FileNotFoundError:
+    print("No se encontró el archivo.")
+finally:
+    if archivo is not None:
+        archivo.close()
+    print("Bloque finally ejecutado siempre.")</code>
+</pre>
+					</div>
+					<div class="snippet-bar output-bar">
+					  <span class="snippet-tag tag-output">salida</span>
+					</div>
+
+					<div class="output-body">
+<pre>
+# si datos.txt no existe
+No se encontró el archivo.
+Bloque finally ejecutado siempre.
+
+# si datos.txt contiene: abc
+El archivo no contiene un número válido.
+Bloque finally ejecutado siempre.
+
+# si datos.txt contiene: 42
+Bloque finally ejecutado siempre.
+</pre>
+					</div>
+				</div>
+				<p>
+					El mensaje del <code>finally</code> aparece en los tres casos, y es ahí donde se cierra el archivo (si llegó a abrirse).
+				</p>
+			</div>
+			
+			
+			<div class="card">
+				<h3>Alternativa moderna: <code>with</code></h3>
+				<p>
+					Para liberar recursos como archivos, la práctica moderna es el gestor de contexto <code>with</code>, que cierra el recurso automáticamente al salir del bloque, haya o no excepción. Estos dos fragmentos cierran el archivo de forma equivalente:
+				</p>
+<pre>
+<code class="language-python">archivo = None
+try:
+    archivo = open("datos.txt", "r")
+    contenido = archivo.read()
+finally:
+    if archivo is not None:
+        archivo.close()</code>
+</pre>
+<pre>
+<code class="language-python">with open("datos.txt", "r") as archivo:
+    contenido = archivo.read()</code>
+</pre>
+				<p>
+					<code>with</code> solo garantiza la liberación del recurso; no captura la excepción. Si quieres manejarla, sigues necesitando un <code>try / except</code> alrededor.
+				</p>
+			</div>
+
+			<div class="nav-buttons"><button class="nav-arrow-btn" onclick="goToSection(2)">← Anterior</button><button class="nav-arrow-btn" onclick="goToSection(4)">Siguiente: raise →</button></div>
+		</div>
+
+		<!-- ===== SECCIÓN 4: raise ===== -->
+		<div class="section" id="section-4">
+			<div class="section-header">
+				<div class="section-icon icon-yellow">🚨</div>
+				<div class="section-header-text">
+					<h2>raise</h2>
+					<p>Lanzar y encadenar excepciones</p>
+				</div>
+			</div>
+
+			<div class="card">
+				<h3>🚀 Lanzar excepciones con <code>raise</code></h3>
+				<p>
+					Hasta ahora hemos visto cómo <strong>capturar</strong> excepciones que Python lanza automáticamente cuando algo sale mal. Pero a veces eres tú quien necesita lanzarlas manualmente, porque tu código detectó una condición inválida que Python por sí solo no consideraría un error.
+				</p>
+				<p>
+					Por ejemplo, Python no tiene problema en aceptar una edad negativa como número entero válido, pero para tu aplicación eso es un error. <code>raise</code> te permite establecer tus propias reglas y comunicarlas mediante excepciones, usando el mismo mecanismo que usa Python internamente.
+				</p>
+			</div>
+
+			<div class="card">
+				<h3>⚙️ Sintaxis básica</h3>
+				<p>
+					Lanzar una excepción de forma explícita:
+				</p>
+<pre>
+<code class="language-python">raise TipoDeExcepcion("mensaje de error personalizado")</code>
+</pre>
+			</div>
+
+			<div class="card">
+				<h3>💻 Ejemplo:</h3>
+				<div class="snippet">
+					<div class="snippet-bar">
+					  <div class="dots"><span></span><span></span><span></span></div>
+					  <span class="snippet-title">Python</span>
+					  <span class="snippet-tag tag-fn">ejemplo</span>
+					</div>
+					<div class="code-wrap">
+						<div class="line-numbers-col"></div>
+<pre>
+<code class="language-python">edad = -5
+
+if edad &lt; 0:
+    raise ValueError("La edad no puede ser negativa")</code>
+</pre>
+					</div>
+					<div class="snippet-bar output-bar">
+					  <span class="snippet-tag tag-output">salida</span>
+					</div>
+
+					<div class="output-body">
+<pre>
+Traceback (most recent call last):
+  File "ejemplo.py", line 4, in &lt;module&gt;
+    raise ValueError("La edad no puede ser negativa")
+ValueError: La edad no puede ser negativa
+</pre>
+					</div>
+				</div>
+				<p>
+					<strong>Qué está pasando</strong>
+				</p>
+				<ol style="padding-left:45px;">
+					<li>La condición <code>edad &lt; 0</code> se cumple, porque <code>edad</code> vale <code>-5</code>.</li>
+					<li><code>raise ValueError(...)</code> crea la excepción y detiene el flujo normal del programa en ese punto.</li>
+					<li>No hay ningún <code>try / except</code> que la capture, así que la excepción llega hasta el intérprete de Python, que <strong>termina el programa</strong> y muestra el <em>traceback</em>.</li>
+					<li>El traceback indica, de arriba hacia abajo, el archivo y la línea donde se lanzó la excepción (<code>line 4</code>), el código de esa línea y, en la última línea, el tipo de excepción con su mensaje.</li>
+				</ol>
+				
+			</div>
+			
+			
+			<div class="tip-box">
+				<div class="tip-title">💡 Tip:</div>
+				<p>
+					Para capturar la excepción y evitar que el programa se detenga abruptamente, debes envolver el bloque donde se evalúa y se lanza (raise) el error dentro de un bloque try, y manejar el error en la sección except.
+				</p>
+				<pre>
+<code class="language-python">edad = -5
+
+try:
+    if edad &lt; 0:
+        raise ValueError("La edad no puede ser negativa")
+except ValueError as e:
+    print(f"Excepción capturada: {e}")
+
+print("El programa continúa su ejecución normal...")</code>
+</pre>
+			</div>
+
+			<div class="card">
+				<h3>👍 Validar entradas de funciones</h3>
+				<p>
+					Es muy común usar <code>raise</code> para asegurarte de que los argumentos pasados a una función cumplen con los requisitos mínimos antes de continuar la ejecución.
+				</p>
+				<h3>💻 Ejemplo:</h3>
+				<div class="snippet">
+					<div class="snippet-bar">
+					  <div class="dots"><span></span><span></span><span></span></div>
+					  <span class="snippet-title">Python</span>
+					  <span class="snippet-tag tag-fn">ejemplo</span>
+					</div>
+					<div class="code-wrap">
+						<div class="line-numbers-col"></div>
+<pre>
+<code class="language-python">def verificar_edad(edad):
+    if edad &lt; 0:
+        raise ValueError("La edad no puede ser un número negativo.")
+    elif edad &lt; 18:
+        print("Acceso denegado: eres menor de edad.")
+    else:
+        print("Acceso concedido.")
+
+# Uso:
+verificar_edad(-5)</code>
+</pre>
+					</div>
+					<div class="snippet-bar output-bar">
+					  <span class="snippet-tag tag-output">salida</span>
+					</div>
+
+					<div class="output-body">
+<pre>
+Traceback (most recent call last):
+  File "ejemplo.py", line 10, in &lt;module&gt;
+    verificar_edad(-5)
+  File "ejemplo.py", line 3, in verificar_edad
+    raise ValueError("La edad no puede ser un número negativo.")
+ValueError: La edad no puede ser un número negativo.
+</pre>
+					</div>
+				</div>
+				<p>
+					<strong>Qué está pasando</strong>
+				</p>
+				<ol style="padding-left:45px;">
+					<li>Se llama a <code>verificar_edad(-5)</code> y la función recibe <code>edad = -5</code>.</li>
+					<li>La primera condición, <code>edad &lt; 0</code>, se cumple y se ejecuta <code>raise ValueError(...)</code>.</li>
+					<li>El <code>raise</code> sale de la función de inmediato: no se evalúan el <code>elif</code> ni el <code>else</code>, por eso no se imprime "Acceso denegado" ni "Acceso concedido".</li>
+					<li>Como no hay un <code>try / except</code> que la capture, el programa termina con un traceback de dos niveles: primero la línea que llamó a la función (<code>line 10</code>) y después la línea del <code>raise</code> dentro de ella (<code>line 3</code>).</li>
+					<li>Con una edad válida no se lanza ninguna excepción: <code>verificar_edad(25)</code> imprime <code>Acceso concedido.</code> y <code>verificar_edad(15)</code> imprime <code>Acceso denegado: eres menor de edad.</code></li>
+				</ol>
+			</div>
+
+			<div class="card">
+				<h3>🔁 Relanzar una excepción: <code>raise</code> sin argumentos (re-raise)</h3>
+				<p>
+					A veces quieres capturar una excepción con <code>try-except</code> para registrar el error (en un archivo de log, por ejemplo) o realizar alguna limpieza, pero aun así deseas que el error se propague hacia afuera. En este caso, usas <code>raise</code> solo, sin argumentos.
+				</p>
+				<p>
+					Para recibir la excepción relanzada con <code>raise</code>, debes envolver la llamada al primer bloque (o a la función que contiene dicho bloque) dentro de <strong>otro bloque</strong> <code>try/except</code> <strong>externo</strong>.
+				</p>
+				<h3>💻 Ejemplo:</h3>
+				<div class="snippet">
+					<div class="snippet-bar">
+					  <div class="dots"><span></span><span></span><span></span></div>
+					  <span class="snippet-title">Python</span>
+					  <span class="snippet-tag tag-fn">ejemplo</span>
+					</div>
+					<div class="code-wrap">
+						<div class="line-numbers-col"></div>
+<pre>
+<code class="language-python">def realizar_division():
+	# --- Nivel inferior ---
+    try:
+        resultado = 10 / 0
+    except ZeroDivisionError:
+        print("[Nivel Interno] Registrando el error...")
+        raise  # Relanza la excepción hacia quien llamó a la función
+
+
+# --- Nivel superior ---
+try:
+    realizar_division()
+except ZeroDivisionError:
+    print("[Nivel Externo] Excepción capturada con éxito. El programa continúa sin colapsar.")
+
+print("Fin de la ejecución.")</code>
+</pre>
+					</div>
+					<div class="snippet-bar output-bar">
+					  <span class="snippet-tag tag-output">salida</span>
+					</div>
+
+					<div class="output-body">
+<pre>
+[Nivel Interno] Registrando el error...
+[Nivel Externo] Excepción capturada con éxito. El programa continúa sin colapsar.
+Fin de la ejecución.
+</pre>
+					</div>
+				</div>
+				<p>
+					<strong>Qué está pasando</strong>
+				</p>
+				<ol style="padding-left:45px;">
+					<li>
+						El bloque <strong>interno</strong> (dentro de la función) detecta la división entre cero y cae en su propio <code>except</code>.
+					</li>
+					<li>
+						Imprime <em>"[Interno] Registrando el error..."</em>.
+					</li>
+					<li>
+						La sentencia <code>raise</code> <strong>interrumpe el bloque interno</strong> y manda el <code>ZeroDivisionError</code> hacia "arriba".
+					</li>
+					<li>
+						El bloque <code>try</code> <strong>externo</strong> atrapa la excepción relanzada.
+					</li>
+					<li>
+						Se ejecuta el <code>except ZeroDivisionError</code> externo y el programa continúa su ejecución normal sin interrumpir el script.
+					</li>
+				</ol>
+			</div>
+
+			<div class="card">
+				<h3>⛓️ Encadenar excepciones: <code>raise ... from ...</code></h3>
+				<p>
+					Puedes transformar una excepción de bajo nivel en una más comprensible o relevante para tu aplicación sin perder el contexto original.
+				</p>
+				<h3 class="sub">Sintaxis</h3>
+<pre>
+<code class="language-python">raise NuevaExcepcion("mensaje") from excepcion_original</code>
+</pre>
+				<h3>💻 Ejemplo:</h3>
+				<div class="snippet">
+					<div class="snippet-bar">
+					  <div class="dots"><span></span><span></span><span></span></div>
+					  <span class="snippet-title">Python</span>
+					  <span class="snippet-tag tag-fn">ejemplo</span>
+					</div>
+					<div class="code-wrap">
+						<div class="line-numbers-col"></div>
+<pre>
+<code class="language-python">def leer_edad(texto):
+    try:
+        return int(texto)
+    except ValueError as e:
+        raise ValueError(f"Edad inválida: {texto!r}. Debe ser un número entero.") from e
+
+try:
+    leer_edad("veinte")
+except ValueError as err:
+    print(f"Error: {err}")
+    print(f"Causa original: {err.__cause__}")</code>
+</pre>
+					</div>
+					<div class="snippet-bar output-bar">
+					  <span class="snippet-tag tag-output">salida</span>
+					</div>
+
+					<div class="output-body">
+<pre>
+Error: Edad inválida: 'veinte'. Debe ser un número entero.
+Causa original: invalid literal for int() with base 10: 'veinte'
+</pre>
+					</div>
+				</div>
+				<p>
+					<strong>Qué está pasando</strong>
+				</p>
+				<ol style="padding-left:45px;">
+					<li><code>int("veinte")</code> falla y lanza un <code>ValueError</code>.</li>
+					<li>Lo capturamos y lanzamos una excepción nueva (otro <code>ValueError</code>) con un mensaje más claro para quien use la función, que incluye el valor recibido.</li>
+					<li>Con <code>from e</code>, la excepción original queda guardada en el atributo <code>__cause__</code> de la nueva.</li>
+				</ol>
+			</div>
+
+			<div class="note-box">
+				<div class="note-title">📝 Nota:</div>
+				<p>
+					Si lanzas una excepción dentro de un <code>except</code> sin usar <code>from</code>, Python también enlaza ambas excepciones, pero de forma implícita (en <code>__context__</code>). Con <code>from e</code> la relación queda explícita en <code>__cause__</code>.
+				</p>
+			</div>
+
+			<div class="card">
+				<h3>🤫 Suprimir la causa: <code>from None</code></h3>
+				<p>
+					Si no quieres que el traceback muestre la excepción original, usa <code>from None</code>. Esto deja <code>__cause__</code> en <code>None</code> y evita que el traceback muestre la excepción anterior, aunque esta sigue disponible en el atributo <code>__context__</code>.
+				</p>
+				<div class="snippet">
+					<div class="snippet-bar">
+					  <div class="dots"><span></span><span></span><span></span></div>
+					  <span class="snippet-title">Python</span>
+					  <span class="snippet-tag tag-fn">ejemplo</span>
+					</div>
+					<div class="code-wrap">
+						<div class="line-numbers-col"></div>
+<pre>
+<code class="language-python">def leer_edad(texto):
+    try:
+        return int(texto)
+    except ValueError:
+        raise ValueError(f"Edad inválida: {texto!r}. Debe ser un número entero.") from None
+
+try:
+    leer_edad("veinte")
+except ValueError as err:
+    print(f"Error: {err}")
+    print(f"Causa: {err.__cause__}")</code>
+</pre>
+					</div>
+					<div class="snippet-bar output-bar">
+					  <span class="snippet-tag tag-output">salida</span>
+					</div>
+
+					<div class="output-body">
+<pre>
+Error: Edad inválida: 'veinte'. Debe ser un número entero.
+Causa: None
+</pre>
+					</div>
+				</div>
+				<p>
+					Si esta excepción no se capturara, el traceback mostraría únicamente la nueva excepción, sin la de <code>int()</code>.
+				</p>
+			</div>
+	
+
+			<div class="nav-buttons"><button class="nav-arrow-btn" onclick="goToSection(3)">← Anterior</button><button class="nav-arrow-btn" disabled>🏁 Fin del tutorial</button></div>
+		</div>
+
+    </main>
+
+    <footer class="footer-m365">
+		<div class="footer-content">
+			<div class="footer-top-bar"></div>
+			<p class="footer-m365-title">Curso Programación Orientada a Objetos en Python</p>
+			<p class="footer-m365-label">Módulo Manejo de Excepciones</p>
+			<div class="footer-banner" >
+				<div class="footer-text">
+					<span class="label">Instructor: </span>
+					<div class="footer-logo-space">
+						<img src="imgs/LogoM.png" alt="Logo" style="height: 44px;"><span class="name">anuel</span>
+					</div>
+					<div class="footer-logo-space">
+						<img src="imgs/LogoA.png" alt="Logo" style="height: 40px;"><span class="name">lejandro</span>
+					</div>
+					<div class="footer-logo-space">
+						<img src="imgs/LogoL.png" alt="Logo"><span class="name">ópez</span>
+					</div>
+					<div class="footer-logo-space">
+						<img src="imgs/LogoZ.png" alt="Logo"><span class="name">epeda</span>
+					</div>
+				</div>
+			</div>
+			<div class="footer-bottom-bar"></div>
+		</div>
+	</footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        const totalSections = 5;
+        let currentSection = 0;
+
+        function goToSection(index) {
+            if (index < 0 || index >= totalSections) return;
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('section-' + index).classList.add('active');
+            currentSection = index;
+            document.querySelectorAll('.nav-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateProgress() {
+            document.getElementById('progressFill').style.width = ((currentSection + 1) / totalSections * 100) + '%';
+            document.getElementById('progressText').textContent = 'Sección ' + (currentSection + 1) + ' de ' + totalSections;
+        }
+
+        function addLineNumbers() {
+            document.querySelectorAll('.code-wrap').forEach(wrap => {
+                const code = wrap.querySelector('code');
+                const col = wrap.querySelector('.line-numbers-col');
+                if (!code || !col) return;
+                const lines = code.textContent.split('\n');
+                const count = lines[lines.length - 1].trim() === '' ? lines.length - 1 : lines.length;
+                col.innerHTML = Array.from({ length: count }, (_, i) => '<span>' + (i + 1) + '</span>').join('');
+            });
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'ArrowRight') goToSection(currentSection + 1);
+            else if (e.key === 'ArrowLeft') goToSection(currentSection - 1);
+        });
+
+        addLineNumbers();
+        updateProgress();
+    </script>
+</body>
+</html>
